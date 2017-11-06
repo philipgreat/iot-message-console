@@ -7,7 +7,9 @@ window.onload = function () {
     var conn;
     var msg = document.getElementById("msg");
     var log = document.getElementById("log");
+    var conter = document.getElementById("counter");
     
+    var ignoreCounter = 0;
     function appendLog(item) {
         var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
         log.appendChild(item);
@@ -42,6 +44,8 @@ window.onload = function () {
                 }
                 var message = messages[i];
                 if(message.indexOf(filter)<0){
+                    ignoreCounter++;
+                    conter.innerHTML=ignoreCounter;
                     continue;
                 }
                 var item = document.createElement("div");
@@ -94,7 +98,7 @@ body {
 <body>
 <div id="log"></div>
 <form id="form">
-    <label for="msg" style="padding-right:10px">输入过滤字符</label></label><input type="text" id="msg" size="64"/><input type="reset" value="清空" />
+    <div id="counter"></div><label for="msg" style="padding-right:10px">输入过滤字符</label></label><input type="text" id="msg" size="64"/><input type="reset" value="清空" />
 </form>
 </body>
 </html>
