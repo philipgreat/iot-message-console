@@ -33,7 +33,7 @@ func castIoTMessage(hub *Hub) {
 	buf := make([]byte, 1024)
 
 	for {
-		n, addr, err := ServerConn.ReadFromUDP(buf)
+		n, _, err := ServerConn.ReadFromUDP(buf)
 		if err != nil {
 			fmt.Println("Error: ", err)
 			continue
