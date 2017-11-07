@@ -44,7 +44,7 @@ func castIoTMessage(hub *Hub) {
 
 		}
 		//fmt.Println("Received ", string(decodedBuffer[0:n]), " from ", addr)
-		fmt.Println(string(decodedBuffer[0:n]))
+		fmt.Println(addr, " ", string(decodedBuffer[0:n]))
 		hub.broadcast <- decodedBuffer[0:n]
 
 	}

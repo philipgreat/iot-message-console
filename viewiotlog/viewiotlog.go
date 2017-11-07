@@ -17,6 +17,7 @@ func init() {
 }
 
 func main() {
+	log.Println("server started on ", addrString)
 	addr, err := net.ResolveUDPAddr("udp", *addrString)
 	if err != nil {
 		log.Fatalln(err)
