@@ -20,7 +20,7 @@ const (
 	pingPeriod = (pongWait * 9) / 10
 
 	// Maximum message size allowed from peer.
-	maxMessageSize = 512
+	maxMessageSize = 8512
 )
 
 var (
@@ -29,8 +29,8 @@ var (
 )
 
 var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
+	ReadBufferSize:  8024,
+	WriteBufferSize: 8024,
 }
 
 // Client is a middleman between the websocket connection and the hub.
@@ -88,28 +88,34 @@ func (c *Client) writePump() {
 			if !ok {
 				// The hub closed the channel.
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				log.Printf("1 find an Error")
 				return
 			}
 
 			w, err := c.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
+				log.Printf("2 find an Error")
+				log.Println(err)
+				log.Println(string(message))
+
 				return
 			}
 			w.Write(message)
-
+			//log.Printf("..")
 			// Add queued chat messages to the current websocket message.
-			n := len(c.send)
-			for i := 0; i < n; i++ {
-				w.Write(newline)
-				w.Write(<-c.send)
-			}
+			//n := len(c.send)
+			//for i := 0; i < n; i++ {
+			//	w.Write(newline)
+			//	w.Write(<-c.send)
+			//}
 
-			if err := w.Close(); err != nil {
-				return
-			}
+			//if err := w.Close(); err != nil {
+			//	return
+			//}
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+				log.Printf("c.conn.WriteMessage")
 				return
 			}
 		}

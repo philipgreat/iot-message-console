@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -22,12 +23,14 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	fmt.Println("The server started")
 	flag.Parse()
 	hub := newHub()
 	go hub.run()
 	go castIoTMessage(hub)
 	http.HandleFunc("/", serveHome)
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("get a ws request")
 		serveWs(hub, w, r)
 	})
 

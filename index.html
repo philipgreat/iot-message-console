@@ -1,108 +1,152 @@
-<!DOCTYPE html>
+
 <html lang="en">
-<head>
-<title>IoT日志工具</title>
-<script type="text/javascript">
-window.onload = function () {
-    var conn;
-    var msg = document.getElementById("msg");
-    var log = document.getElementById("log");
-    var conter = document.getElementById("counter");
+    <head>
+    <title>IoT日志工具v</title>
+    <script type="text/javascript">
     
-    var ignoreCounter = 0;
-    function appendLog(item) {
-        var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
-        log.appendChild(item);
-        if (doScroll) {
-            log.scrollTop = log.scrollHeight - log.clientHeight;
+    function hasAllString(inputString, filterString){
+        var res = filterString.split(" ");
+        for(var k in res){
+            if(inputString.indexOf(res[k])<0){
+                return false;
+            }
         }
+        return true;
     }
-    document.getElementById("form").onsubmit = function () {
-        
-        return false;
-    };
-    document.getElementById("form").onreset = function () {
-        log.innerHTML="";
-        return false;
-    };
-    if (window["WebSocket"]) {
-        conn = new WebSocket("ws://" + document.location.host + "/ws");
-        conn.onclose = function (evt) {
-            var item = document.createElement("div");
-            item.innerHTML = "<b>Connection closed.</b>";
-            appendLog(item);
+    
+    
+    window.onload = function () {
+        var conn;
+        var msg = document.getElementById("msg");
+        var log = document.getElementById("log");
+        var conter = document.getElementById("counter");
+        var presentCounter = 0;	    
+        var ignoreCounter = 0;
+        function appendLog(item) {
+            var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+            if(presentCounter % 1000 ===0){
+            log.innerHTML="";
+        }
+        presentCounter = presentCounter+1;
+        log.appendChild(item);
+            if (doScroll) {
+                log.scrollTop = log.scrollHeight - log.clientHeight;
+            }
+        }
+        document.getElementById("form").onsubmit = function () {
+            
+            return false;
         };
-        conn.onmessage = function (evt) {
-            var messages = evt.data.split('\n');
-            var filter = msg.value;
-            for (var i = 0; i < messages.length; i++) {
-                if(!filter||filter==""){
+        document.getElementById("form").onreset = function () {
+            log.innerHTML="";
+            return false;
+        };
+        if (window["WebSocket"]) {
+            conn = new WebSocket("ws://" + document.location.host + "/ws?q="+msg.value);
+            conn.onclose = function (evt) {
+                var item = document.createElement("div");
+                item.innerHTML = "<b>Connection closed.</b>";
+                appendLog(item);
+            };
+            conn.onmessage = function (evt) {
+                var messages = evt.data.split('\n');
+                var filter = msg.value;
+                for (var i = 0; i < messages.length; i++) {
+                    if(!filter||filter==""){
+                        var item = document.createElement("div");
+                        item.innerText = messages[i];
+                        appendLog(item);
+                        continue;
+                    }
+                    var message = messages[i];
+                    if(!hasAllString(message, filter)){
+                        ignoreCounter++;
+                        conter.innerHTML=ignoreCounter;
+                        continue;
+                    }
                     var item = document.createElement("div");
                     item.innerText = messages[i];
                     appendLog(item);
-                    continue;
+                    
                 }
-                var message = messages[i];
-                if(message.indexOf(filter)<0){
-                    ignoreCounter++;
-                    conter.innerHTML=ignoreCounter;
-                    continue;
-                }
-                var item = document.createElement("div");
-                item.innerText = messages[i];
-                appendLog(item);
-                
-            }
-        };
-    } else {
-        var item = document.createElement("div");
-        item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
-        appendLog(item);
+            };
+        } else {
+            var item = document.createElement("div");
+            item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+            appendLog(item);
+        }
+    };
+    </script>
+    <style type="text/css">
+    html {
+        overflow: hidden;
     }
-};
-</script>
-<style type="text/css">
-html {
-    overflow: hidden;
-}
-body {
-    overflow: hidden;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-    height: 100%;
-    background: rgb(156, 156, 156);
-}
-#log {
-    background: white;
-    margin: 0;
-    padding: 0.5em 0.5em 0.5em 0.5em;
-    position: absolute;
-    top: 0.5em;
-    left: 0.5em;
-    right: 0.5em;
-    bottom: 3em;
-    overflow: auto;
-}
-#form {
-    padding: 0 0.5em 0 0.5em;
-    margin: 0;
-    position: absolute;
-    bottom: 1em;
-    left: 0px;
-    width: 100%;
-    overflow: hidden;
-}
-</style>
-</head>
-<body>
-<div id="log"></div>
-<form id="form">
-    <label for="msg" style="padding-right:10px">输入过滤字符</label></label>
-    <input type="text" id="msg" size="64"/><input type="reset" value="清空" />
-    已经过滤<span id="counter">0</span>条
-    本地工具<a href="/viewiotlog.exe">下载</a>
-</form>
-</body>
-</html>
-
+    body {
+        overflow: hidden;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        background: rgb(156, 156, 156);
+    }
+    #log {
+        background: white;
+        margin: 0;
+        padding: 0.5em 0.5em 0.5em 0.5em;
+        position: absolute;
+        top: 0.5em;
+        left: 0.5em;
+        right: 0.5em;
+        bottom: 5em;
+        overflow: auto;
+        font-size: 12px;
+       font-family: "Courier New", Courier, monospace;
+    }
+    #form {
+        padding: 0 0.5em 0 0.5em;
+        margin: 0;
+        position: absolute;
+        bottom: 1em;
+        left: 0px;
+        width: 100%;
+        overflow: hidden;
+    }
+    </style>
+    </head>
+    <body>
+    <div id="log"></div>
+    <form id="form">
+        <label for="msg" style="padding-right:10px">输入过滤字符</label></label>
+        <input type="text" id="msg" size="64"/><input type="reset" value="清空" />已经过滤<span id="counter">0</span>条 本地工具<a href='/viewiotlog.exe'>下载</a>
+    </form>
+    </body>
+    
+    
+    
+    
+    
+    
+    
+    
+    <script>
+        const url = new URL(window.location.href);
+        const searchParams = url.searchParams;
+        //alert(searchParams.get('q'));
+        var msg = document.getElementById("msg");
+        msg.value=searchParams.get('q');
+    
+    
+    </script>
+    
+    
+    
+    
+    
+    
+    
+    
+    </html>
+    
+    
+    
+    
