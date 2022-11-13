@@ -51,7 +51,13 @@ func castIoTMessage(hub *Hub) {
 			continue
 		}
 
-		fmt.Println("failed to deocde  ", string(buf[0:n]), " from ", addr)
+		fmt.Println("failed to deocde  ", string(buf[0:n]), " from ", *addr)
+
+		if utf8.Valid(buf) {
+			hub.broadcast <- buf[0:n]
+			continue
+		}
+
 		//fmt.Println(addr, "  ", string(decodedBuffer[0:n]))
 		//hub.broadcast <- decodedBuffer[0:n]
 
