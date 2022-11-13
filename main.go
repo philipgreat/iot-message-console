@@ -29,7 +29,7 @@ func main() {
 	go hub.run()
 	go castIoTMessage(hub)
 	http.HandleFunc("/", serveHome)
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/message-center/public", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("get a ws request")
 		serveWs(hub, w, r)
 	})

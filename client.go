@@ -94,6 +94,7 @@ func (c *Client) writePump() {
 
 			w, err := c.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
+				// here fails when not a valid UTF8 text
 				log.Printf("2 find an Error")
 				log.Println(err)
 				log.Println(string(message))
@@ -103,11 +104,11 @@ func (c *Client) writePump() {
 			w.Write(message)
 			//log.Printf("..")
 			// Add queued chat messages to the current websocket message.
-			//n := len(c.send)
-			//for i := 0; i < n; i++ {
-			//	w.Write(newline)
-			//	w.Write(<-c.send)
-			//}
+			n := len(c.send)
+			for i := 0; i < n; i++ {
+				w.Write(newline)
+				w.Write(<-c.send)
+			}
 
 			//if err := w.Close(); err != nil {
 			//	return

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"unicode/utf8"
 )
 
 func decode(b []byte, length int) ([]byte, error) {
@@ -30,7 +31,7 @@ func castIoTMessage(hub *Hub) {
 	checkError(err)
 	defer ServerConn.Close()
 
-	buf := make([]byte, 1024)
+	buf := make([]byte, 8192)
 
 	for {
 		//n, addr, err := ServerConn.ReadFromUDP(buf)
@@ -42,10 +43,17 @@ func castIoTMessage(hub *Hub) {
 		decodedBuffer, err := decode(buf, n)
 		if err != nil {
 			fmt.Println("Error: ", err)
+			continue
 		}
-		//fmt.Println("Received ", string(decodedBuffer[0:n]), " from ", addr)
-		//fmt.Println(addr, " ", string(decodedBuffer[0:n]))
-		hub.broadcast <- decodedBuffer[0:n]
+
+		if utf8.Valid(decodedBuffer) {
+			hub.broadcast <- decodedBuffer[0:n]
+			continue
+		}
+
+		fmt.Println("failed to deocde  ", string(buf[0:n]), " from ", addr)
+		//fmt.Println(addr, "  ", string(decodedBuffer[0:n]))
+		//hub.broadcast <- decodedBuffer[0:n]
 
 	}
 }
