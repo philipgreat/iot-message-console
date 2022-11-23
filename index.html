@@ -41,13 +41,8 @@
             log.innerHTML="";
             return false;
         };
-        if (window["WebSocket"]) {
-            conn = new WebSocket("ws://" + document.location.host + "/ws?q="+msg.value);
-            conn.onclose = function (evt) {
-                var item = document.createElement("div");
-                item.innerHTML = "<b>Connection closed.</b>";
-                appendLog(item);
-            };
+        function start(websocketServerLocation){
+            conn = new WebSocket(websocketServerLocation);
             conn.onmessage = function (evt) {
                 var messages = evt.data.split('\n');
                 var filter = msg.value;
@@ -70,6 +65,18 @@
                     
                 }
             };
+            conn.onclose = function(){
+                // Try to reconnect in 5 seconds
+                var item = document.createElement("div");
+                item.innerHTML = "<b>Connection closed.</b>";
+                appendLog(item);
+                setTimeout(function(){start(websocketServerLocation)}, 2000);
+            };
+        }
+        if (window["WebSocket"]) {
+            //conn = new WebSocket("ws://" + document.location.host + "/ws?q="+msg.value);
+            start("ws://" + document.location.host + "/message-center/public");
+            
         } else {
             var item = document.createElement("div");
             item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
