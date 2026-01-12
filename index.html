@@ -65,10 +65,17 @@
                     
                 }
             };
+            conn.onopen = function(){
+                // Try to reconnect in 5 seconds
+                var item = document.createElement("div");
+                item.innerHTML = "<b>Connected.</b>";
+                appendLog(item);
+                
+            };
             conn.onclose = function(){
                 // Try to reconnect in 5 seconds
                 var item = document.createElement("div");
-                item.innerHTML = "<b>Connection closed.</b>";
+                item.innerHTML = "<b>Connection closed. Reconnecting</b>";
                 appendLog(item);
                 setTimeout(function(){start(websocketServerLocation)}, 2000);
             };
