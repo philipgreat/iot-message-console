@@ -22,3 +22,4 @@
 hs_err_pid*
 /bin/
 iot-log-server
+.DS_Store
