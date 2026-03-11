@@ -34,8 +34,7 @@ func castIoTMessage(hub *Hub) {
 	buf := make([]byte, 8192)
 
 	for {
-		//n, addr, err := ServerConn.ReadFromUDP(buf)
-		n, _, err := ServerConn.ReadFromUDP(buf)
+		n, addr, err := ServerConn.ReadFromUDP(buf)
 		if err != nil {
 			fmt.Println("Error: ", err)
 			continue
@@ -47,19 +46,16 @@ func castIoTMessage(hub *Hub) {
 		}
 
 		if utf8.Valid(decodedBuffer) {
-			hub.broadcast <- decodedBuffer[0:n]
+			// 在数据前加上IP地址标记
+			ipPrefix := []byte("[" + addr.IP.String() + "] ")
+			combinedData := make([]byte, len(ipPrefix) + n)
+			copy(combinedData, ipPrefix)
+			copy(combinedData[len(ipPrefix):], decodedBuffer[0:n])
+			
+			hub.broadcast <- combinedData
 			continue
 		}
-
-		fmt.Println("failed to deocde  ", string(buf[0:n]), " from ", *addr)
-
-		if utf8.Valid(buf) {
-			hub.broadcast <- buf[0:n]
-			continue
-		}
-
-		//fmt.Println(addr, "  ", string(decodedBuffer[0:n]))
-		//hub.broadcast <- decodedBuffer[0:n]
-
+		
+		fmt.Println("failed to decode ", string(buf[0:n]), " from ", addr.IP.String())
 	}
 }
